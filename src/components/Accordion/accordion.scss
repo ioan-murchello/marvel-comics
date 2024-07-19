@@ -1,0 +1,62 @@
+.accordion {
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  margin-bottom: 10px;
+  overflow: hidden;
+  -webkit-border-radius: 4px;
+  -moz-border-radius: 4px;
+  -ms-border-radius: 4px;
+  -o-border-radius: 4px;
+}
+
+.accordion-header {
+  background-color: #f8f9fa;
+  padding: 1rem;
+  cursor: pointer;
+  border-bottom: 1px solid #ddd;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  transition: background-color 0.3s ease;
+  -webkit-transition: background-color 0.3s ease;
+  -moz-transition: background-color 0.3s ease;
+  -ms-transition: background-color 0.3s ease;
+  -o-transition: background-color 0.3s ease;
+  &:hover {
+    background-color: #e9ecef;  
+  }
+}
+
+.accordion-button {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  background: none;
+  border: none;
+  font-size: 1rem;
+  font-weight: bold;
+  color: #212529;
+  text-align: left;
+  width: 100%;
+}
+
+.accordion-icon {
+  margin-left: auto; /* Push icon to the right */
+  font-size: 1.5rem;
+}
+
+.accordion-collapse { 
+  background-color: #ffffff;
+  transition: all 0.5s ease;
+  overflow: hidden;
+  overflow-y: auto;
+  -webkit-transition: all 0.5s ease;
+  -moz-transition: all 0.5s ease;
+  -ms-transition: all 0.5s ease;
+  -o-transition: all 0.5s ease;
+  max-height: 0;
+}
+
+.accordion-collapse.show {
+  max-height: 250px; 
+}
