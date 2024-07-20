@@ -5,42 +5,23 @@ import { getComic } from '../marvelServices/services';
 import AppHeader from '../components/appHeader/AppHeader'; 
 import Skeleton from '../components/skeleton/Skeleton'
 import Error from '../components/Error/Error';
+import { useQuery } from '@tanstack/react-query';
 
 const SingleComicPage = () => {
   const { comicId } = useParams();
+
+  const {data, isSuccess, isError, isPending} = useQuery({
+    queryKey: ['comic', comicId],
+    queryFn: () => getComic(comicId)
+  }) 
   const [comic, setComic] = useState(null);
-  const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState(false);
- 
+
   useEffect(() => {
-    setIsLoading(true);
-    const fetchComic = async () => {
-      try {
-        const res = await getComic(comicId);
-        if (res && res.data.results.length > 0) {
-          setComic(res.data.results[0]);
-        } else {
-          setError(true);
-        }
-      } catch (error) {
-        setError(true);
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
-    fetchComic();
-  }, [comicId]);
- 
-
-  if (error) {
-    return (
-      <div className='app'>
-        <AppHeader />
-       <Error/>
-      </div>
-    );
-  }
+    if (isSuccess) {
+      setComic(data.data.results[0]);
+    }
+  }, [comic, comicId, isSuccess]);
+  
 
   if(!comic){
     return <div className='app'>
@@ -52,8 +33,8 @@ const SingleComicPage = () => {
   return (
     <div className='app'>
       <AppHeader />
-      {error && <Error />}
-      {isLoading ? (
+      {isError && <Error />}
+      {isPending ? (
         <Skeleton />
       ) : (
         <div className='single-comic'>

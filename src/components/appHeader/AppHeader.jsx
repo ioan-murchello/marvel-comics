@@ -1,9 +1,21 @@
 import { NavLink } from 'react-router-dom';
 import './appHeader.scss';
+import { useEffect, useRef } from 'react';
 
 const AppHeader = () => {
+  const headerRef = useRef(null);
+  useEffect(() => {
+    if (headerRef.current) {
+      const headerHeight = headerRef.current.getBoundingClientRect().height;
+      document.documentElement.style.setProperty(
+        '--header-height',
+        `${headerHeight}px`
+      );
+    }
+  }, []);
+
   return (
-    <header className='app__header'>
+    <header className='app__header' ref={headerRef}>
       <h1 className='app__title'>
         <a href='#'>
           <span>

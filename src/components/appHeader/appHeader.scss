@@ -2,7 +2,12 @@
 
 .app {
     &__header {
+        position: sticky;
+        top: 0;
+        z-index: 100;
         display: flex;
+        background-color: #fff;
+        padding: 25px 5px;
         justify-content: space-between;
         @media(max-width: 600px){
             flex-direction: column;

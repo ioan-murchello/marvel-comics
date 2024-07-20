@@ -3,22 +3,41 @@ import './charList.scss';
 import Skeleton from '../skeleton/Skeleton';
 import { onRequest } from '../../marvelServices/services';
 import handleKeyDown from '../../helpers';
+import { useInfiniteQuery } from '@tanstack/react-query';
+import Error from '../Error/Error';
 
-const CharList = ({ list, setCharInfo, setIsClose, error, setError }) => {
-   
+const CharList = ({ setCharInfo, setIsClose }) => {
+  const fetchCharacters = async ({ pageParam }) => {
+    const data = await onRequest(pageParam);
+    return data.data.results;
+  };
+
+  const {
+    data,
+    isSuccess,
+    error,
+    isFetchingNextPage,
+    fetchNextPage,
+    hasNextPage,
+  } = useInfiniteQuery({
+    queryKey: ['charList'],
+    queryFn: fetchCharacters,
+    getNextPageParam: (lastPage, pages) => { 
+      if (lastPage.length < 9) {
+        return null;
+      } 
+      return pages.length * 9 + 210;
+    },
+  });
+
   const [active, setActive] = useState(null);
-  const [charList, setCharList] = useState(list);
-  const [limit, setLimit] = useState(219);
-  const [isLoading, setIsLoading] = useState(false);
-  const [listEnded, setListEnded] = useState(false); 
+  const [charList, setCharList] = useState([]);
 
   const handleSelectChar = (id, index) => {
     let char = charList.find((el) => el.id === id);
-
     setCharInfo(char);
     setActive(index);
 
-     
     if (window.innerWidth <= 768) {
       setIsClose(true);
     } else {
@@ -26,36 +45,12 @@ const CharList = ({ list, setCharInfo, setIsClose, error, setError }) => {
     }
   };
 
-   const handleRequest = async () => {
-     setError(false);
-     setIsLoading(true);
-
-     try {
-       const data = await onRequest(limit);
-       if (data && data.data.results) {
-         const newList = data.data.results;
-         setCharList((prev) => [...prev, ...newList]);
-
-         if (newList.length < 9) {
-           setListEnded(true);
-         }
-
-         setLimit((prev) => prev + 9);
-       } else {
-         setListEnded(true);
-       }
-     } catch (error) {
-       console.error(error);
-       setError(true);
-     } finally {
-       setIsLoading(false);
-     }
-   };
-
   useEffect(() => {
-    setCharList(list);
-  }, [list]);
- 
+    if (isSuccess) {
+      const list = data.pages.flat();
+      setCharList(list);
+    }
+  }, [data, isSuccess]);
 
   const skeletonList = (
     <div className='char__list'>
@@ -71,11 +66,10 @@ const CharList = ({ list, setCharInfo, setIsClose, error, setError }) => {
     </div>
   );
 
-
-
   if (!charList.length) {
     return skeletonList;
   }
+
   return (
     <div className='char__list'>
       {!charList.length && error ? (
@@ -111,13 +105,13 @@ const CharList = ({ list, setCharInfo, setIsClose, error, setError }) => {
               })}
           </ul>
           <button
-            disabled={isLoading}
-            onClick={handleRequest}
+            disabled={isFetchingNextPage}
+            onClick={() => fetchNextPage()}
             className='button button__main button__long'
-            style={{ display: listEnded ? 'none' : 'block' }}
+            style={{ display: !hasNextPage ? 'none' : 'block' }}
           >
             <div className='inner'>
-              {isLoading ? 'loading...' : 'load more'}
+              {isFetchingNextPage ? 'loading...' : 'load more'}
             </div>
           </button>
         </>

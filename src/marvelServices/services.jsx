@@ -6,19 +6,11 @@ const baseOffset = 210;
 const limit = 9;
 
 export const onRequest = async (offset = 210) => {
-  try {
-    const res = await fetch(
-      `${baseUrl}characters?limit=${limit}&offset=${offset}&${apiKey}`
-    );
+  const res = await fetch(
+    `${baseUrl}characters?limit=${limit}&offset=${offset}&${apiKey}`
+  );
 
-    if (!res.ok) {
-      throw new Error(res.status);
-    }
-    return await res.json();
-  } catch (error) {
-    console.log('Could not fetch...', error);
-    return null;
-  }
+  return await res.json();
 };
 
 export const getResource = async () => {
@@ -53,30 +45,22 @@ export const getCharacter = async (id) => {
 };
 
 export const getAllComics = async (offset = 0) => {
-  try {
-    const res = await fetch(
-      `${baseUrl}comics?orderBy=issueNumber&limit=14&offset=${offset}&${apiKey}`
-    );
+  const res = await fetch(
+    `${baseUrl}comics?orderBy=issueNumber&limit=14&offset=${offset}&${apiKey}`
+  );
 
-    if (!res.ok) {
-      throw new Error('Some problem to load comics...');
-    }
-    return await res.json();
-  } catch (error) {
-    console.log(error);
-    return null;
-  }
+  return await res.json();
 };
 
 export const getComic = async (id) => {
   try {
     const res = await fetch(`${baseUrl}comics/${id}?${apiKey}`);
-    if(!res.ok){
-      throw new Error('Some problem to load comic...')
+    if (!res.ok) {
+      throw new Error('Some problem to load comic...');
     }
     return await res.json();
   } catch (error) {
-    console.log(error)
-    return null
+    console.log(error);
+    return null;
   }
 };

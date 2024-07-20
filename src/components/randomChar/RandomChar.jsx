@@ -4,73 +4,80 @@ import { useEffect, useState } from 'react';
 import { getCharacter } from '../../marvelServices/services';
 import Spiner from '../Spiner';
 import Error from '../Error/Error';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 
 const RandomChar = () => {
+  const queryClient = useQueryClient();
   const [char, setChar] = useState({});
   const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState(false);
+  const [isError, setIsError] = useState(false);
+
   const { name, description, thumbnail, urls } = char;
- 
-   const generateRandomId = () => {
-     return Math.floor(Math.random() * (1011400 - 1011000) + 1011000);
-   };
 
-   const updateChar = async (retryLimit = 5) => {
-     if (retryLimit <= 0) {
-       setError(true);
-       setIsLoading(false);
-       return;
-     }
+  const { data, isSuccess } = useQuery({
+    queryKey: ['char'],
+    queryFn: async () => {
+      const id = generateRandomId();
+      return await getCharacter(id);
+    },
+    onSuccess: (data) => {
+      if (data && data.data.results.length > 0) {
+        setChar(data.data.results[0]);
+      }
+    },
+  });
 
-     setIsLoading(true);
-     setError(false);
+  const generateRandomId = () => {
+    return Math.floor(Math.random() * (1011400 - 1011000) + 1011000);
+  };
 
-     const id = generateRandomId();
+  const updateChar = async (retryLimit = 5) => {
+    if (retryLimit <= 0) {
+      setIsError(true);
+      setIsLoading(false);
+      return;
+    }
 
-     try {
-       const res = await getCharacter(id);
-       if (res === null || res.status === 404 || res.status === 401) {
-         await updateChar(retryLimit - 1); 
-       } else {
-         setChar(res.data.results[0]);
-         setIsLoading(false);
-       }
-     } catch (error) {
-       setError(true);
-       setIsLoading(false);
-     }
-   };
+    setIsLoading(true);
+    setIsError(false);
 
-   useEffect(() => {
-     const initialChar = async () => {
-       setIsLoading(true);
-       try {
-         const res = await getCharacter(1011052);
-         if (res && res.data.results.length > 0) {
-           setChar(res.data.results[0]);
-         } else {
-           await updateChar();
-         }
-         setIsLoading(false);
-       } catch (error) {
-         setError(true);
-         setIsLoading(false);
-       }
-     };
+    const id = generateRandomId();
 
-     initialChar();
-   }, []);
- 
+    try {
+      const res = await getCharacter(id);
+      if (res === null || res.status === 404) {
+        await updateChar();
+      } else if (res.status === 401) {
+        await updateChar(retryLimit - 1);
+      } else {
+        setChar(res.data.results[0]);
+        setIsLoading(false);
+        queryClient.invalidateQueries(['char']);
+      }
+    } catch (error) {
+      setIsError(true);
+      setIsLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    setIsLoading(true);
+    if (data && data.data.results.length > 0) {
+      setChar(data.data.results[0]);
+    }
+    setIsLoading(false);
+  }, [data, isSuccess]);
 
   return (
     <div className='randomchar'>
-      
-      {isLoading ? (
-        <Spiner />
+      {isLoading || !isSuccess ? (
+        <div className='randomchar__spiner-wrapper'>
+          <Spiner />
+        </div>
       ) : (
         <div className='randomchar__block'>
-          {error ? (
-              <Error/>  
+          {isError ? (
+            <Error />
           ) : (
             <>
               <div className='randomchar__img-wrapper'>
@@ -129,7 +136,11 @@ const RandomChar = () => {
           Do you want to get to know him better?
         </p>
         <p className='randomchar__title'>Or choose another one</p>
-        <button onClick={() => updateChar()} className='button button__main'>
+        <button
+          disabled={isLoading || !isSuccess}
+          onClick={() => updateChar()}
+          className='button button__main'
+        >
           <div className='inner'>try it</div>
         </button>
         <img src={mjolnir} alt='mjolnir' className='randomchar__decoration' />

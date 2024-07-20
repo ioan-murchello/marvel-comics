@@ -1,7 +1,6 @@
 import './charInfo.scss';
 import Skeleton from '../skeleton/Skeleton';
-import Accordion from '../Accordion/Accordion';
-import Spiner from '../Spiner';
+import Accordion from '../Accordion/Accordion'; 
 import { useState, useEffect, useRef } from 'react';
 
 const CharInfo = ({ charInfo, isClose, setIsClose }) => {
@@ -21,21 +20,28 @@ const CharInfo = ({ charInfo, isClose, setIsClose }) => {
   useEffect(() => {
     const handleScroll = () => {
       if (charInfoRef.current) {
-        const windowHeight = window.pageYOffset;
+        const headerHeight = parseInt(
+          getComputedStyle(document.documentElement).getPropertyValue(
+            '--header-height'
+          )
+        );
+        const windowHeight =
+          window.pageYOffset ||
+          document.documentElement.scrollTop ||
+          document.body.scrollTop;
         const windowWidth = window.innerWidth;
 
-        setWidth(windowWidth)
+        setWidth(windowWidth);
 
         if (windowWidth <= 768 && windowHeight > 300) {
           setIsSticky(false);
         } else {
-          setIsSticky(windowHeight > 300);
+          setIsSticky(windowHeight > headerHeight); // 20 is an additional offset
         }
 
-        if(windowWidth > 768){
-          setIsClose(false)
+        if (windowWidth > 768) {
+          setIsClose(false);
         }
-
       }
     };
 
@@ -49,6 +55,41 @@ const CharInfo = ({ charInfo, isClose, setIsClose }) => {
       window.removeEventListener('scroll', handleScroll);
     };
   }, [char]);
+
+  // useEffect(() => {
+  //   const handleScroll = () => {
+  //     if (charInfoRef.current) {
+  //       const windowHeight =
+  //         window.pageYOffset ||
+  //         document.documentElement.scrollTop ||
+  //         document.body.scrollTop; ;
+  //       const windowWidth = window.innerWidth;
+
+  //       setWidth(windowWidth)
+
+  //       if (windowWidth <= 768 && windowHeight > 300) {
+  //         setIsSticky(false);
+  //       } else {
+  //         setIsSticky(windowHeight > 300);
+  //       }
+
+  //       if(windowWidth > 768){
+  //         setIsClose(false)
+  //       }
+
+  //     }
+  //   };
+
+  //   handleScroll();
+
+  //   window.addEventListener('resize', handleScroll);
+  //   window.addEventListener('scroll', handleScroll);
+
+  //   return () => {
+  //     window.removeEventListener('resize', handleScroll);
+  //     window.removeEventListener('scroll', handleScroll);
+  //   };
+  // }, [char]);
 
 
 
@@ -104,7 +145,7 @@ const CharInfo = ({ charInfo, isClose, setIsClose }) => {
                       {series.name}
                     </li>
                   ))
-                : 'No more comics available for this character'}
+                : 'No comics available for this character'}
             </ul>
           </Accordion>
 
