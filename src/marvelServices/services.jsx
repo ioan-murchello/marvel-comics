@@ -40,10 +40,10 @@ export const getCharacter = async (id) => {
     return await res.json();
   } catch (error) {
     console.log('Char was not found..');
-    return null;
+    return false;
   }
 };
-
+//1011108
 export const getAllComics = async (offset = 0) => {
   const res = await fetch(
     `${baseUrl}comics?orderBy=issueNumber&limit=14&offset=${offset}&${apiKey}`

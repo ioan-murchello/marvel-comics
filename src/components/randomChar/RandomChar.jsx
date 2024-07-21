@@ -14,19 +14,22 @@ const RandomChar = () => {
 
   const { name, description, thumbnail, urls } = char;
 
-  const { data, isSuccess } = useQuery({
-    queryKey: ['char'],
-    queryFn: async () => {
-      const id = generateRandomId();
-      return await getCharacter(id);
-    },
-    onSuccess: (data) => {
-      if (data && data.data.results.length > 0) {
-        setChar(data.data.results[0]);
-      }
-    },
-  });
+    const { data, isSuccess } = useQuery({
+      queryKey: ['char'],
+      queryFn: async () => {
+        let res = await getCharacter(1011061);
+        if (!res || (res.data && res.data.results.length === 0)) {
+          res = await getCharacter(1011061 + 1);
+        }
+         if (!res || (res.data && res.data.results.length === 0)) {
+           throw new Error('Character not found');
+         }
+        return res;
+      },
+    });
 
+  //1011108 not founded char id for testing
+  
   const generateRandomId = () => {
     return Math.floor(Math.random() * (1011400 - 1011000) + 1011000);
   };
@@ -46,7 +49,9 @@ const RandomChar = () => {
     try {
       const res = await getCharacter(id);
       if (res === null || res.status === 404) {
+        setIsLoading(true);
         await updateChar();
+        setIsLoading(false);
       } else if (res.status === 401) {
         await updateChar(retryLimit - 1);
       } else {
